@@ -8,7 +8,7 @@ _logger = logging.getLogger(__name__)
 class CrmLead(models.Model):
     _inherit = 'crm.lead'
 
-    def send_notification_to_ntfy(message, title="Notification", priority="normal", tags=None):
+    def send_notification_to_ntfy(self, message, title="Notification", priority="normal", tags=None):
         """
         Sends a notification message to an NTFY server.
 
@@ -16,7 +16,7 @@ class CrmLead(models.Model):
             message (str): The message to be sent in the notification.
             title (str): The title of the notification. Default is "Notification".
             priority (str): The priority of the notification. Default is "normal".
-            tags (str or list): Optional tags for the notification. Default is None.
+            tags (list or None): Optional tags for the notification.
         """
         url = "https://push.simstech.cloud/simstech-odoo-alerts"
         data = {"message": message}
