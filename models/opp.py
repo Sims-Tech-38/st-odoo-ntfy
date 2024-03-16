@@ -56,14 +56,14 @@ class CrmLead(models.Model):
         self.send_notification_to_ntfy(message, title="New CRM Record Created")
         return record
 
-    # @api.onchange('stage_id')
-    # def onchange_stage_id(self):
-    #     """
-    #     Sends a notification to NTFY when the stage of the opportunity is changed.
+    @api.onchange('stage_id')
+    def onchange_stage_id(self):
+        """
+        Sends a notification to NTFY when the stage of the opportunity is changed.
 
-    #     Args:
-    #         self (object): The CRM lead object.
-    #     """
-    #     _logger.info("Stage changed to %s", self.stage_id.name)
-    #     message = f"The stage of the opportunity has been changed to {self.stage_id.name}"
-    #     self.send_notification_to_ntfy(message, title="Opportunity Stage Changed")
+        Args:
+            self (object): The CRM lead object.
+        """
+        _logger.info("Stage changed to %s", self.stage_id.name)
+        message = f"The stage of the opportunity has been changed to {self.stage_id.name}"
+        self.send_notification_to_ntfy(message, title="Opportunity Stage Changed")
