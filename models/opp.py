@@ -19,7 +19,7 @@ class CrmLead(models.Model):
             tags (list or None): Optional tags for the notification.
         """
         url = "https://push.simstech.cloud/simstech-odoo-alerts"
-        data = {"message": message}
+        data = message
         headers = {
             "Title": title,
             "Priority": priority
