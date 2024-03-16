@@ -4,12 +4,13 @@ import logging
 
 _logger = logging.getLogger(__name__)
 
+
 class CrmLead(models.Model):
     _inherit = 'crm.lead'
 
     def send_notification_to_ntfy(self, message, title="Notification", priority="high", tags=None):
         """
-        Sends a notification message to an NTFY server, including a link to the CRM lead record.
+        Sends a notification message to an NTFY server.
 
         Args:
             message (str): The message to be sent in the notification.
@@ -17,15 +18,9 @@ class CrmLead(models.Model):
             priority (str): The priority of the notification. Default is "normal".
             tags (list or None): Optional tags for the notification.
         """
-        # Construct the link to the CRM record
-        base_url = self.env['ir.config_parameter'].sudo().get_param('web.base.url')
-        action_id = self.env.ref('crm.crm_lead_action_pipeline').id  # You might need to adjust this based on your actual action ID
-        menu_id = self.env.ref('crm.menu_crm_opportunities').id  # Adjust based on your actual menu ID
-        record_url = f"{base_url}/web#id={self.id}&cids=1&menu_id={menu_id}&action={action_id}&model=crm.lead&view_type=form"
-        full_message = f"{message}\n\nView Record: {record_url}"
-
-        # Prepare the notification payload
-        data = full_message.encode('utf-8')
+        url = "https://push.simstech.cloud/simstech-odoo-alerts"
+        # Encode your message in UTF-8
+        data = message.encode('utf-8')
         headers = {
             "Title": title,
             "Priority": priority
@@ -35,31 +30,40 @@ class CrmLead(models.Model):
                 tags = [tags]
             headers["Tags"] = ','.join(tags)
 
-        # Send the notification
-        url = "https://push.simstech.cloud/simstech-odoo-alerts"
         try:
             response = requests.post(url, data=data, headers=headers)
             if response.status_code == 200:
                 _logger.info("Notification sent successfully")
             else:
-                _logger.error("Failed to send notification. Status code: %s", response.status_code)
+                # Log more error details
+                _logger.error("Failed to send notification. Status code: %s, Response: %s", response.status_code, response.text)
         except Exception as e:
             _logger.error("Failed to send notification. Exception: %s", str(e))
+
 
     def create(self, vals):
         """
         Overrides the create method to send a notification when a new CRM record is created.
+
+        Args:
+            vals (dict): The dictionary of values for the record being created.
+
+        Returns:
+            object: The created record.
         """
         record = super(CrmLead, self).create(vals)
         message = f"A new CRM record has been created: {record.name}"
         self.send_notification_to_ntfy(message, title="New CRM Record Created")
         return record
 
-    @api.onchange('stage_id')
-    def onchange_stage_id(self):
-        """
-        Sends a notification to NTFY when the stage of the opportunity is changed.
-        """
-        _logger.info("Stage changed to %s", self.stage_id.name)
-        message = f"The stage of the opportunity has been changed to {self.stage_id.name}"
-        self.send_notification_to_ntfy(message, title="Opportunity Stage Changed")
+    # @api.onchange('stage_id')
+    # def onchange_stage_id(self):
+    #     """
+    #     Sends a notification to NTFY when the stage of the opportunity is changed.
+
+    #     Args:
+    #         self (object): The CRM lead object.
+    #     """
+    #     _logger.info("Stage changed to %s", self.stage_id.name)
+    #     message = f"The stage of the opportunity has been changed to {self.stage_id.name}"
+    #     self.send_notification_to_ntfy(message, title="Opportunity Stage Changed")
