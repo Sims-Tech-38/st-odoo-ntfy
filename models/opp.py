@@ -8,7 +8,6 @@ _logger = logging.getLogger(__name__)
 class CrmLead(models.Model):
     _inherit = 'crm.lead'
 
-    @staticmethod
     def send_notification_to_ntfy(message, title="Notification", priority="normal", tags=None):
         """
         Sends a notification message to an NTFY server.
@@ -39,7 +38,6 @@ class CrmLead(models.Model):
         except Exception as e:
             _logger.error("Failed to send notification. Exception: %s", str(e))
 
-    @api.model
     def create(self, vals):
         """
         Overrides the create method to send a notification when a new CRM record is created.
@@ -63,5 +61,6 @@ class CrmLead(models.Model):
         Args:
             self (object): The CRM lead object.
         """
+        _logger.info("Stage changed to %s", self.stage_id.name)
         message = f"The stage of the opportunity has been changed to {self.stage_id.name}"
         self.send_notification_to_ntfy(message, title="Opportunity Stage Changed", tags=["opportunity", "stage", "change"])
