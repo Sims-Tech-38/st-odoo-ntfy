@@ -50,7 +50,7 @@ class CrmLead(models.Model):
         """
         record = super(CrmLead, self).create(vals)
         message = f"A new CRM record has been created: {record.name}"
-        self.send_notification_to_ntfy(message, title="New CRM Record Created", tags=["crm", "record", "create"])
+        self.send_notification_to_ntfy(message, title="New CRM Record Created")
         return record
 
     @api.onchange('stage_id')
@@ -63,4 +63,4 @@ class CrmLead(models.Model):
         """
         _logger.info("Stage changed to %s", self.stage_id.name)
         message = f"The stage of the opportunity has been changed to {self.stage_id.name}"
-        self.send_notification_to_ntfy(message, title="Opportunity Stage Changed", tags=["opportunity", "stage", "change"])
+        self.send_notification_to_ntfy(message, title="Opportunity Stage Changed")
