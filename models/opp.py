@@ -19,7 +19,9 @@ class CrmLead(models.Model):
         """
         # Construct the link to the CRM record
         base_url = self.env['ir.config_parameter'].sudo().get_param('web.base.url')
-        record_url = f"{base_url}/web#id={self.id}&model=crm.lead&view_type=form"
+        action_id = self.env.ref('crm.crm_lead_action_pipeline').id  # You might need to adjust this based on your actual action ID
+        menu_id = self.env.ref('crm.menu_crm_opportunities').id  # Adjust based on your actual menu ID
+        record_url = f"{base_url}/web#id={self.id}&cids=1&menu_id={menu_id}&action={action_id}&model=crm.lead&view_type=form"
         full_message = f"{message}\n\nView Record: {record_url}"
 
         # Prepare the notification payload
