@@ -8,7 +8,7 @@ _logger = logging.getLogger(__name__)
 class CrmLead(models.Model):
     _inherit = 'crm.lead'
 
-    def send_notification_to_ntfy(self, message, title="Notification", priority="normal", tags=None):
+    def send_notification_to_ntfy(self, message, title="Notification", priority="high", tags=None):
         """
         Sends a notification message to an NTFY server.
 
@@ -19,7 +19,8 @@ class CrmLead(models.Model):
             tags (list or None): Optional tags for the notification.
         """
         url = "https://push.simstech.cloud/simstech-odoo-alerts"
-        data = message
+        # Encode your message in UTF-8
+        data = message.encode('utf-8')
         headers = {
             "Title": title,
             "Priority": priority
@@ -34,9 +35,11 @@ class CrmLead(models.Model):
             if response.status_code == 200:
                 _logger.info("Notification sent successfully")
             else:
-                _logger.error("Failed to send notification. Status code: %s", response.status_code)
+                # Log more error details
+                _logger.error("Failed to send notification. Status code: %s, Response: %s", response.status_code, response.text)
         except Exception as e:
             _logger.error("Failed to send notification. Exception: %s", str(e))
+
 
     def create(self, vals):
         """
@@ -53,14 +56,14 @@ class CrmLead(models.Model):
         self.send_notification_to_ntfy(message, title="New CRM Record Created")
         return record
 
-    @api.onchange('stage_id')
-    def onchange_stage_id(self):
-        """
-        Sends a notification to NTFY when the stage of the opportunity is changed.
+    # @api.onchange('stage_id')
+    # def onchange_stage_id(self):
+    #     """
+    #     Sends a notification to NTFY when the stage of the opportunity is changed.
 
-        Args:
-            self (object): The CRM lead object.
-        """
-        _logger.info("Stage changed to %s", self.stage_id.name)
-        message = f"The stage of the opportunity has been changed to {self.stage_id.name}"
-        self.send_notification_to_ntfy(message, title="Opportunity Stage Changed")
+    #     Args:
+    #         self (object): The CRM lead object.
+    #     """
+    #     _logger.info("Stage changed to %s", self.stage_id.name)
+    #     message = f"The stage of the opportunity has been changed to {self.stage_id.name}"
+    #     self.send_notification_to_ntfy(message, title="Opportunity Stage Changed")
